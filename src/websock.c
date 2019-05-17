@@ -684,6 +684,14 @@ void libwebsock_dispatch_message(libwebsock_client_state *state) {
 	msg->payload_len = message_payload_len;
 	msg->payload = message_payload_orig;
 
+    if (state->onmessage) {
+        state->onmessage(state, msg);
+	    lws_free(msg->payload);
+	    lws_free(msg);
+
+        return ;
+    }
+
 	libwebsock_onmessage_wrapper *wrapper =
 			(libwebsock_onmessage_wrapper *) lws_malloc(
 					sizeof(libwebsock_onmessage_wrapper));
@@ -865,6 +873,11 @@ void libwebsock_handshake_finish(struct bufferevent *bev,
 	ctx->clients_HEAD = state;
 
 	if (state->onopen != NULL) {
+		state->onopen(state);
+	}
+
+	if (0) {
+	//if (state->onopen != NULL) {
 		pthread_t *onopen_thread = (pthread_t *) lws_malloc(sizeof(pthread_t));
 		pthread_create(onopen_thread, NULL, libwebsock_pthread_onopen,
 				(void *) state);
