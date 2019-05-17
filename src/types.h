@@ -104,6 +104,16 @@ typedef struct _thread_state_wrapper {
 	libwebsock_client_state *state;
 } thread_state_wrapper;
 
+
+typedef struct relay_server
+{
+	unsigned char			id;
+
+	struct event_base		*event_base;
+
+	pthread_t				pth_id;
+} relay_server_t;
+
 typedef struct _libwebsock_context {
         int running;
         int ssl_init;
@@ -117,6 +127,8 @@ typedef struct _libwebsock_context {
         int (*onpong)(libwebsock_client_state *);
         libwebsock_client_state *clients_HEAD;
         void *user_data; //context specific user data
+
+		relay_server_t **server;
 } libwebsock_context;
 
 typedef struct _libwebsock_onmessage_wrapper {

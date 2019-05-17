@@ -196,9 +196,89 @@ libwebsock_bind(libwebsock_context *ctx, char *listen_host, char *port)
   libwebsock_bind_socket(ctx,  sockfd);
 }
 
+static void run_events(struct event_base *base, void *e)
+{
+	//if (!base && e)
+	//	base = e->event_base;
+
+	if (!base)
+		return;
+
+	event_base_dispatch(base);
+}
+
+static void timeout_cb(evutil_socket_t fd, short event, void *arg) 
+{
+}
+static void relay_server_task_set(void *base)
+{
+	//struct event timeout;
+	struct timeval tv;
+	int flags = EV_PERSIST;
+	/* Initalize one event */
+	struct event *timeout = event_new(base, -1, flags, timeout_cb, NULL);
+	//event_assign(&timeout, base, -1, flags, timeout_cb, (void*) &timeout);
+
+	evutil_timerclear(&tv);
+	tv.tv_sec = 60000;
+	event_add(timeout, &tv);
+}
+
+static void relay_server_setup(void* p, relay_server_t *server, void *base)
+{
+	if (base)
+		server->event_base = base;
+	else
+		server->event_base = event_base_new();
+}
+
+static void *relay_server_thread(void *arg)
+{
+	relay_server_t *server = (relay_server_t *)arg;
+	//vmp_node_t* p = server->priv;
+
+	evthread_use_pthreads();
+
+	relay_server_setup(NULL, server, NULL);
+	relay_server_task_set(server->event_base);
+
+	run_events(server->event_base, NULL);
+
+	fprintf(stderr, "relay server thread %p exit", (void*)pthread_self());
+	pthread_exit(0);
+
+	return arg;
+}
+
+static void relay_server_general(libwebsock_context *ctx, int num)
+{
+	int ret = 0, i = 0;
+	//PrivInfo* thiz = p->private;
+
+	relay_server_t **server = calloc(1, sizeof(relay_server_t*) * num);
+	//thiz->relay_server = server;
+	ctx->server = server;
+
+	for (i = 0; i < num; i++)
+	{
+		server[i] = calloc(1, sizeof(relay_server_t));
+		server[i]->id	= i+1;
+		//server[i]->priv = p;
+
+		ret = pthread_create(&(server[i]->pth_id), NULL, relay_server_thread, (void*)server[i]);
+		if (ret != 0)
+			fprintf(stderr, "relay server create thread \'%p\' failed", &(server[i]->pth_id));
+
+		pthread_detach(server[i]->pth_id);
+	}
+}
+
+
 void 
 libwebsock_bind_socket(libwebsock_context *ctx, evutil_socket_t sockfd)
 {
+	relay_server_general(ctx, 8);
+
   struct event *listener_event = event_new(ctx->base, sockfd, EV_READ | EV_PERSIST, libwebsock_handle_accept, (void *) ctx);
   event_add(listener_event, NULL);
 }
