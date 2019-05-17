@@ -121,9 +121,11 @@ extern pthread_mutex_t global_alloc_free_lock;
 
 int libwebsock_send_fragment(libwebsock_client_state *state, const char *data, unsigned int len, int flags);
 void libwebsock_send_cleanup(const void *data, size_t len, void *arg);
+#if 0
 void libwebsock_cleanup_thread_list(evutil_socket_t sock, short what, void *arg);
 void libwebsock_cancel_state_threads(libwebsock_client_state *state);
 void libwebsock_insert_into_thread_list(libwebsock_client_state *state, pthread_t *tptr, enum WS_THREAD_TYPE type);
+#endif
 void libwebsock_shutdown(libwebsock_client_state *state);
 void libwebsock_shutdown_after_send_cb(evutil_socket_t fd, short what, void *arg);
 void libwebsock_shutdown_after_send(struct bufferevent *bev, void *arg);
@@ -142,9 +144,11 @@ void libwebsock_do_read(struct bufferevent *bev, void *ptr);
 void libwebsock_do_event(struct bufferevent *bev, short event, void *ptr);
 void libwebsock_handshake_finish(struct bufferevent *bev, libwebsock_client_state *state);
 void libwebsock_handshake(struct bufferevent *bev, void *ptr);
+#if 0
 void *libwebsock_pthread_onmessage(void *arg);
 void *libwebsock_pthread_onclose(void *arg);
 void *libwebsock_pthread_onopen(void *arg);
+#endif
 void libwebsock_fragmented_add(libwebsock_fragmented *frag, char *buf, unsigned int len);
 void libwebsock_fragmented_finish(libwebsock_fragmented *frag);
 libwebsock_fragmented *libwebsock_fragmented_new(libwebsock_client_state *state);

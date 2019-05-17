@@ -143,6 +143,7 @@ void libwebsock_populate_close_info_from_frame(libwebsock_close_info **info,
 	*info = new_info;
 }
 
+#if 0
 void
 libwebsock_insert_into_thread_list(libwebsock_client_state *state, pthread_t *thread, enum WS_THREAD_TYPE type)
 {
@@ -246,6 +247,7 @@ void libwebsock_cleanup_thread_list(evutil_socket_t sock, short what, void *arg)
 #endif
 	lws_free(wrapper);
 }
+#endif
 
 void libwebsock_shutdown(libwebsock_client_state *state) {
 	libwebsock_context *ctx = (libwebsock_context *) state->ctx;
@@ -469,7 +471,7 @@ void libwebsock_handle_accept(evutil_socket_t listener, short event, void *arg) 
 	bev = bufferevent_socket_new(ctx->base, fd,
 			BEV_OPT_CLOSE_ON_FREE | BEV_OPT_THREADSAFE);
 	client_state->bev = bev;
-	pthread_mutex_init(&client_state->thread_lock, NULL);
+	//pthread_mutex_init(&client_state->thread_lock, NULL);
 	bufferevent_setcb(bev, libwebsock_handshake, libwebsock_handle_send,
 			libwebsock_do_event, (void *) client_state);
 	bufferevent_enable(bev, EV_READ | EV_WRITE);
@@ -692,6 +694,7 @@ void libwebsock_dispatch_message(libwebsock_client_state *state) {
         return ;
     }
 
+#if 0
 	libwebsock_onmessage_wrapper *wrapper =
 			(libwebsock_onmessage_wrapper *) lws_malloc(
 					sizeof(libwebsock_onmessage_wrapper));
@@ -709,10 +712,10 @@ void libwebsock_dispatch_message(libwebsock_client_state *state) {
 	} else {
 		fprintf(stderr, "No onmessage call back registered with libwebsock.\n");
 	}
+#endif
 }
 
-
-
+#if 0
 void *
 libwebsock_pthread_onmessage(void *arg) {
 	libwebsock_onmessage_wrapper *wrapper = arg;
@@ -777,6 +780,7 @@ libwebsock_pthread_onclose(void *arg) {
 	event_add(ev, &tv);
 	return NULL;
 }
+#endif
 
 void libwebsock_handshake_finish(struct bufferevent *bev,
 		libwebsock_client_state *state) {
@@ -876,13 +880,14 @@ void libwebsock_handshake_finish(struct bufferevent *bev,
 		state->onopen(state);
 	}
 
-	if (0) {
-	//if (state->onopen != NULL) {
+#if 0
+	if (state->onopen != NULL) {
 		pthread_t *onopen_thread = (pthread_t *) lws_malloc(sizeof(pthread_t));
 		pthread_create(onopen_thread, NULL, libwebsock_pthread_onopen,
 				(void *) state);
 		libwebsock_insert_into_thread_list(state, onopen_thread, th_onopen);
 	}
+#endif
 }
 
 void libwebsock_handshake(struct bufferevent *bev, void *ptr) {

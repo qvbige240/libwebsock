@@ -84,7 +84,7 @@ typedef struct _libwebsock_client_state {
         struct sockaddr_storage *sa;
         struct bufferevent *bev;
         thread_info *tlist;
-        pthread_mutex_t thread_lock;
+        //pthread_mutex_t thread_lock;
         int (*onmessage)(struct _libwebsock_client_state *, libwebsock_message *);
         int (*control_callback)(struct _libwebsock_client_state *, libwebsock_frame *);
         int (*onopen)(struct _libwebsock_client_state *);
