@@ -471,6 +471,7 @@ void libwebsock_handle_accept(evutil_socket_t listener, short event, void *arg) 
 	//pthread_mutex_init(&client_state->thread_lock, NULL);
 
 	unsigned short index = fd % 8;
+	client_state->server = ctx->server[index];
 	struct event_base *base = ctx->server[index]->event_base;
 	//bev = bufferevent_socket_new(ctx->base, fd, 
 	//		BEV_OPT_CLOSE_ON_FREE | BEV_OPT_THREADSAFE);

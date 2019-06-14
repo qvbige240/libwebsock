@@ -76,6 +76,15 @@ typedef struct _thread_info {
 	enum WS_THREAD_TYPE type;
 } thread_info;
 
+typedef struct relay_server
+{
+	unsigned char			id;
+
+	struct event_base		*event_base;
+
+	pthread_t				pth_id;
+} relay_server_t;
+
 typedef struct _libwebsock_client_state {
         int sockfd;
         int flags;
@@ -95,6 +104,10 @@ typedef struct _libwebsock_client_state {
 #endif
         libwebsock_close_info *close_info;
         void *ctx;
+
+		relay_server_t *server;
+		void *priv;
+
         struct _libwebsock_client_state *next;
         struct _libwebsock_client_state *prev;
 } libwebsock_client_state;
@@ -104,15 +117,6 @@ typedef struct _thread_state_wrapper {
 	libwebsock_client_state *state;
 } thread_state_wrapper;
 
-
-typedef struct relay_server
-{
-	unsigned char			id;
-
-	struct event_base		*event_base;
-
-	pthread_t				pth_id;
-} relay_server_t;
 
 typedef struct _libwebsock_context {
         int running;
