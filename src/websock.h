@@ -157,3 +157,4 @@ libwebsock_fragmented *libwebsock_fragmented_new(libwebsock_client_state *state)
 void libwebsock_handle_accept_ssl(evutil_socket_t listener, short event, void *arg);
 #endif
 
+void libwebsock_server_general(libwebsock_context *ctx, int num);

@@ -470,7 +470,7 @@ void libwebsock_handle_accept(evutil_socket_t listener, short event, void *arg) 
 	evutil_make_socket_nonblocking(fd);
 	//pthread_mutex_init(&client_state->thread_lock, NULL);
 
-	unsigned short index = fd % 8;
+	unsigned short index = fd % ctx->total;
 	client_state->server = ctx->server[index];
 	struct event_base *base = ctx->server[index]->event_base;
 	//bev = bufferevent_socket_new(ctx->base, fd, 
@@ -810,6 +810,9 @@ void libwebsock_handshake_finish(struct bufferevent *bev,
 	headers = (char *) lws_calloc(str->data_sz + 1);
 	strncpy(headers, str->data, str->idx);
 	for (tok = strtok(headers, "\r\n"); tok != NULL; tok = strtok(NULL, "\r\n")) {
+		if (strncmp(tok, "GET ", 4) == 0) {
+            printf("==== header uri: %s\n", tok);
+        }
 		if (strstr(tok, "Sec-WebSocket-Key: ") != NULL) {
 			key = (char *) lws_malloc(strlen(tok));
 			strncpy(key, tok + strlen("Sec-WebSocket-Key: "), strlen(tok));

@@ -132,15 +132,15 @@ libwebsock_send_binary(libwebsock_client_state *state, char *in_data, unsigned i
 void
 libwebsock_wait(libwebsock_context *ctx)
 {
-  struct event *sig_event;
-  sig_event = evsignal_new(ctx->base, SIGINT, libwebsock_handle_signal, (void *)ctx);
-  event_add(sig_event, NULL);
-  sig_event = evsignal_new(ctx->base, SIGUSR2, libwebsock_handle_signal, (void *)ctx);
-  event_add(sig_event, NULL);
+  //struct event *sig_event;
+  //sig_event = evsignal_new(ctx->base, SIGINT, libwebsock_handle_signal, (void *)ctx);
+  //event_add(sig_event, NULL);
+  //sig_event = evsignal_new(ctx->base, SIGUSR2, libwebsock_handle_signal, (void *)ctx);
+  //event_add(sig_event, NULL);
   ctx->running = 1;
   event_base_loop(ctx->base, ctx->flags);
   ctx->running = 0;
-  event_free(sig_event);
+  //event_free(sig_event);
 }
 
 void
@@ -273,11 +273,16 @@ static void relay_server_general(libwebsock_context *ctx, int num)
 	}
 }
 
+void libwebsock_server_general(libwebsock_context *ctx, int num)
+{
+	ctx->total = num;
+	relay_server_general(ctx, num);
+}
 
 void 
 libwebsock_bind_socket(libwebsock_context *ctx, evutil_socket_t sockfd)
 {
-	relay_server_general(ctx, 8);
+	libwebsock_server_general(ctx, 8);
 
   struct event *listener_event = event_new(ctx->base, sockfd, EV_READ | EV_PERSIST, libwebsock_handle_accept, (void *) ctx);
   event_add(listener_event, NULL);

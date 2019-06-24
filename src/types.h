@@ -132,6 +132,7 @@ typedef struct _libwebsock_context {
         libwebsock_client_state *clients_HEAD;
         void *user_data; //context specific user data
 
+		int	total;
 		relay_server_t **server;
 } libwebsock_context;
 
