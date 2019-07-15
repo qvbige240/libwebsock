@@ -250,7 +250,7 @@ static void *relay_server_thread(void *arg)
 	return arg;
 }
 
-static void relay_server_general(libwebsock_context *ctx, int num)
+static relay_server_t** relay_server_general(libwebsock_context *ctx, int num)
 {
 	int ret = 0, i = 0;
 	//PrivInfo* thiz = p->private;
@@ -271,18 +271,20 @@ static void relay_server_general(libwebsock_context *ctx, int num)
 
 		pthread_detach(server[i]->pth_id);
 	}
+
+	return server;
 }
 
-void libwebsock_server_general(libwebsock_context *ctx, int num)
+relay_server_t** libwebsock_server_general(libwebsock_context *ctx, int num)
 {
 	ctx->total = num;
-	relay_server_general(ctx, num);
+	return relay_server_general(ctx, num);
 }
 
 void 
 libwebsock_bind_socket(libwebsock_context *ctx, evutil_socket_t sockfd)
 {
-	libwebsock_server_general(ctx, 8);
+	//libwebsock_server_general(ctx, 8);
 
   struct event *listener_event = event_new(ctx->base, sockfd, EV_READ | EV_PERSIST, libwebsock_handle_accept, (void *) ctx);
   event_add(listener_event, NULL);
