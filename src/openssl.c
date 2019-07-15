@@ -51,15 +51,23 @@ libwebsock_handle_accept_ssl(evutil_socket_t listener, short event, void *arg)
       fprintf(stderr, "error during ssl handshake.\n");
     }
     client_state->ctx = (void *) ctx;
-    evutil_make_socket_nonblocking(fd);
+	evutil_make_socket_nonblocking(fd);
 
-	unsigned short index = fd % ctx->total;
-	client_state->server = ctx->server[index];
-	struct event_base *base = ctx->server[index]->event_base;
+	if (ctx->total == 0) {
+		bev = bufferevent_openssl_socket_new(ctx->base, -1, client_state->ssl, 
+			BUFFEREVENT_SSL_OPEN, BEV_OPT_CLOSE_ON_FREE | BEV_OPT_THREADSAFE);
+		client_state->server = calloc(1, sizeof(relay_server_t));
+		client_state->server->id = 0;
+		client_state->server->event_base = ctx->base;
+	} else {
+		unsigned short index = fd % ctx->total;
+		client_state->server = ctx->server[index];
+		struct event_base *base = ctx->server[index]->event_base;
 
-	//bev = bufferevent_openssl_socket_new(ctx->base, -1, client_state->ssl, BUFFEREVENT_SSL_OPEN, BEV_OPT_CLOSE_ON_FREE | BEV_OPT_THREADSAFE);
-    bev = bufferevent_openssl_socket_new(base, -1, client_state->ssl, BUFFEREVENT_SSL_OPEN,
-		BEV_OPT_DEFER_CALLBACKS | BEV_OPT_CLOSE_ON_FREE | BEV_OPT_THREADSAFE);
+		bev = bufferevent_openssl_socket_new(base, -1, client_state->ssl, BUFFEREVENT_SSL_OPEN,
+			BEV_OPT_DEFER_CALLBACKS | BEV_OPT_CLOSE_ON_FREE | BEV_OPT_THREADSAFE);
+	}
+
     client_state->bev = bev;
     bufferevent_setcb(bev, libwebsock_handshake, NULL, libwebsock_do_event, (void *) client_state);
     bufferevent_enable(bev, EV_READ | EV_WRITE);
@@ -160,7 +168,7 @@ libwebsock_bind_ssl_real(libwebsock_context *ctx, char *listen_host, char *port,
   evdata->ssl_ctx = ssl_ctx;
   evdata->ctx = ctx;
 
-  libwebsock_server_general(ctx, 8);
+  //libwebsock_server_general(ctx, 8);
 
   listener_event = event_new(ctx->base, sockfd, EV_READ | EV_PERSIST, libwebsock_handle_accept_ssl, (void *) evdata);
   event_add(listener_event, NULL);

@@ -239,7 +239,7 @@ static void *relay_server_thread(void *arg)
 
 	evthread_use_pthreads();
 
-	relay_server_setup(NULL, server, NULL);
+	//relay_server_setup(NULL, server, NULL);
 	relay_server_task_set(server->event_base);
 
 	run_events(server->event_base, NULL);
@@ -264,6 +264,7 @@ static relay_server_t** relay_server_general(libwebsock_context *ctx, int num)
 		server[i] = calloc(1, sizeof(relay_server_t));
 		server[i]->id	= i+1;
 		//server[i]->priv = p;
+		relay_server_setup(NULL, server[i], NULL);
 
 		ret = pthread_create(&(server[i]->pth_id), NULL, relay_server_thread, (void*)server[i]);
 		if (ret != 0)

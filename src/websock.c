@@ -470,13 +470,20 @@ void libwebsock_handle_accept(evutil_socket_t listener, short event, void *arg) 
 	evutil_make_socket_nonblocking(fd);
 	//pthread_mutex_init(&client_state->thread_lock, NULL);
 
-	unsigned short index = fd % ctx->total;
-	client_state->server = ctx->server[index];
-	struct event_base *base = ctx->server[index]->event_base;
-	//bev = bufferevent_socket_new(ctx->base, fd, 
-	//		BEV_OPT_CLOSE_ON_FREE | BEV_OPT_THREADSAFE);
-	bev = bufferevent_socket_new(base, fd, 
-		BEV_OPT_DEFER_CALLBACKS | BEV_OPT_CLOSE_ON_FREE | BEV_OPT_THREADSAFE);
+	if (ctx->total == 0) {
+		bev = bufferevent_socket_new(ctx->base, fd, 
+			BEV_OPT_CLOSE_ON_FREE | BEV_OPT_THREADSAFE);
+		client_state->server = calloc(1, sizeof(relay_server_t));
+		client_state->server->id = 0;
+		client_state->server->event_base = ctx->base;
+	} else {
+		unsigned short index = fd % ctx->total;
+		client_state->server = ctx->server[index];
+		struct event_base *base = ctx->server[index]->event_base;
+		bev = bufferevent_socket_new(base, fd, 
+			BEV_OPT_DEFER_CALLBACKS | BEV_OPT_CLOSE_ON_FREE | BEV_OPT_THREADSAFE);
+	}
+
 	client_state->bev = bev;
 	bufferevent_setcb(bev, libwebsock_handshake, libwebsock_handle_send,
 			libwebsock_do_event, (void *) client_state);
