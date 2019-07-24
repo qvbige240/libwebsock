@@ -12,6 +12,7 @@ Makefile
 /depcomp
 /install-sh
 /missing
+install
 
 *~
 .*~
@@ -23,6 +24,7 @@ Makefile
 .*.swp
 .libs
 .deps
+tags
 
 *.html
 /autom4te.cache
