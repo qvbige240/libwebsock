@@ -210,7 +210,7 @@ static void run_events(struct event_base *base, void *e)
 static void timeout_cb(evutil_socket_t fd, short event, void *arg) 
 {
 }
-static void relay_server_task_set(void *base)
+static void work_server_idle_task(void *base)
 {
 	//struct event timeout;
 	struct timeval tv;
@@ -224,7 +224,7 @@ static void relay_server_task_set(void *base)
 	event_add(timeout, &tv);
 }
 
-static void relay_server_setup(void* p, relay_server_t *server, void *base)
+static void work_server_setup(void* p, ws_server_t *server, void *base)
 {
 	if (base)
 		server->event_base = base;
@@ -232,43 +232,43 @@ static void relay_server_setup(void* p, relay_server_t *server, void *base)
 		server->event_base = event_base_new();
 }
 
-static void *relay_server_thread(void *arg)
+static void *work_server_thread(void *arg)
 {
-	relay_server_t *server = (relay_server_t *)arg;
+	ws_server_t *server = (ws_server_t *)arg;
 	//vmp_node_t* p = server->priv;
 
 	evthread_use_pthreads();
 
-	//relay_server_setup(NULL, server, NULL);
-	relay_server_task_set(server->event_base);
+	//work_server_setup(NULL, server, NULL);
+	work_server_idle_task(server->event_base);
 
 	run_events(server->event_base, NULL);
 
-	fprintf(stderr, "relay server thread %p exit", (void*)pthread_self());
+	fprintf(stderr, "work server thread %p exit", (void*)pthread_self());
 	pthread_exit(0);
 
 	return arg;
 }
 
-static relay_server_t** relay_server_general(libwebsock_context *ctx, int num)
+static ws_server_t** work_server_general(libwebsock_context *ctx, int num)
 {
 	int ret = 0, i = 0;
 	//PrivInfo* thiz = p->private;
 
-	relay_server_t **server = calloc(1, sizeof(relay_server_t*) * num);
+	ws_server_t **server = calloc(1, sizeof(ws_server_t*) * num);
 	//thiz->relay_server = server;
 	ctx->server = server;
 
 	for (i = 0; i < num; i++)
 	{
-		server[i] = calloc(1, sizeof(relay_server_t));
-		server[i]->id	= i+1;
+		server[i] = calloc(1, sizeof(ws_server_t));
+		server[i]->id = i+1;
 		//server[i]->priv = p;
-		relay_server_setup(NULL, server[i], NULL);
+		work_server_setup(NULL, server[i], NULL);
 
-		ret = pthread_create(&(server[i]->pth_id), NULL, relay_server_thread, (void*)server[i]);
+		ret = pthread_create(&(server[i]->pth_id), NULL, work_server_general, (void*)server[i]);
 		if (ret != 0)
-			fprintf(stderr, "relay server create thread \'%p\' failed", &(server[i]->pth_id));
+			fprintf(stderr, "worker server create thread \'%p\' failed", &(server[i]->pth_id));
 
 		pthread_detach(server[i]->pth_id);
 	}
@@ -276,10 +276,10 @@ static relay_server_t** relay_server_general(libwebsock_context *ctx, int num)
 	return server;
 }
 
-relay_server_t** libwebsock_server_general(libwebsock_context *ctx, int num)
+ws_server_t** libwebsock_server_general(libwebsock_context *ctx, int num)
 {
 	ctx->total = num;
-	return relay_server_general(ctx, num);
+	return work_server_general(ctx, num);
 }
 
 void 

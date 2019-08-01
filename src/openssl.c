@@ -56,7 +56,7 @@ libwebsock_handle_accept_ssl(evutil_socket_t listener, short event, void *arg)
 	if (ctx->total == 0) {
 		bev = bufferevent_openssl_socket_new(ctx->base, -1, client_state->ssl, 
 			BUFFEREVENT_SSL_OPEN, BEV_OPT_CLOSE_ON_FREE | BEV_OPT_THREADSAFE);
-		client_state->server = calloc(1, sizeof(relay_server_t));
+		client_state->server = calloc(1, sizeof(ws_server_t));
 		client_state->server->id = 0;
 		client_state->server->event_base = ctx->base;
 	} else {

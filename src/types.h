@@ -76,14 +76,14 @@ typedef struct _thread_info {
 	enum WS_THREAD_TYPE type;
 } thread_info;
 
-typedef struct relay_server
+typedef struct websock_server_s
 {
 	unsigned char			id;
 
 	struct event_base		*event_base;
 
 	pthread_t				pth_id;
-} relay_server_t;
+} ws_server_t;
 
 typedef struct _libwebsock_client_state {
         int sockfd;
@@ -105,7 +105,7 @@ typedef struct _libwebsock_client_state {
         libwebsock_close_info *close_info;
         void *ctx;
 
-		relay_server_t *server;
+		ws_server_t *server;
 		void *priv;
 
         struct _libwebsock_client_state *next;
@@ -133,7 +133,7 @@ typedef struct _libwebsock_context {
         void *user_data; //context specific user data
 
 		int	total;
-		relay_server_t **server;
+		ws_server_t **server;
 } libwebsock_context;
 
 typedef struct _libwebsock_onmessage_wrapper {
