@@ -266,7 +266,7 @@ static ws_server_t** work_server_general(libwebsock_context *ctx, int num)
 		//server[i]->priv = p;
 		work_server_setup(NULL, server[i], NULL);
 
-		ret = pthread_create(&(server[i]->pth_id), NULL, work_server_general, (void*)server[i]);
+		ret = pthread_create(&(server[i]->pth_id), NULL, work_server_thread, (void*)server[i]);
 		if (ret != 0)
 			fprintf(stderr, "worker server create thread \'%p\' failed", &(server[i]->pth_id));
 
